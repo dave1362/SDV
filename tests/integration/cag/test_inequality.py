@@ -96,7 +96,7 @@ def metadata_reject():
 
 
 @pytest.fixture()
-def patterns_reject():
+def constraints_reject():
     # pattern1 drops high column, which pattern2 relies upon
     pattern1 = Inequality(
         low_column_name='low',
@@ -106,7 +106,7 @@ def patterns_reject():
         low_column_name='low2',
         high_column_name='high',
     )
-    return pattern1, pattern2
+    return [pattern1, pattern2]
 
 
 def test_inequality_pattern_integers(data, metadata, constraint):
@@ -759,8 +759,8 @@ def test_inequality_unequal_datetime_formats_unequal_timezone():
     assert any(col_B.dt.time.astype(str) != '00:00:00')
 
 
-def test_inequality_multiple_patterns():
-    """Test that Inequality constraint works with multiple patterns."""
+def test_inequality_multiple_constraints():
+    """Test that Inequality constraint works with multiple constraints."""
     # Setup
     data = pd.DataFrame({
         'low': [1, 2, 3, 1, 2, 1],
@@ -807,12 +807,12 @@ def test_inequality_multiple_patterns():
     assert all(samples['low'] <= samples['high2'])
 
 
-def test_inequality_multiple_patterns_reject_sampling(
-    data_reject, metadata_reject, patterns_reject
+def test_inequality_multiple_constraints_reject_sampling(
+    data_reject, metadata_reject, constraints_reject
 ):
-    """Test that Inequality constraint works with multiple patterns using reject sampling."""
+    """Test that Inequality constraint works with multiple constraints using reject sampling."""
     # Run
-    synthesizer = run_copula(data_reject, metadata_reject, patterns_reject)
+    synthesizer = run_copula(data_reject, metadata_reject, constraints_reject)
     samples = synthesizer.sample(10)
     updated_metadata = synthesizer.get_metadata('modified')
     original_metadata = synthesizer.get_metadata('original')
@@ -833,8 +833,8 @@ def test_inequality_multiple_patterns_reject_sampling(
     assert all(samples['low'] <= samples['high'])
 
 
-def test_inequality_multiple_patterns_one_pattern_invalid_column():
-    """Test that Inequality constraint works with multiple patterns."""
+def test_inequality_multiple_constraints_one_pattern_invalid_column():
+    """Test that Inequality constraint works with multiple constraints."""
     # Setup
     values = np.random.randint(0, 100, size=1000)
     data = pd.DataFrame({
@@ -882,18 +882,18 @@ def test_inequality_multiple_patterns_one_pattern_invalid_column():
     assert all(samples['mid'] <= samples['high'])
 
 
-def test_inequality_many_patterns():
-    """Test that Inequality constraint works with multiple patterns."""
+def test_inequality_many_constraints():
+    """Test that Inequality constraint works with multiple constraints."""
     # Setup
     values = np.random.randint(0, 100, size=1000)
     data = pd.DataFrame({f'{i}': values + i for i in range(10)})
     metadata = Metadata.load_from_dict({
         'columns': {f'{i}': {'sdtype': 'numerical'} for i in range(10)}
     })
-    patterns = [Inequality(low_column_name=f'{i}', high_column_name=f'{i + 1}') for i in range(9)]
+    constraints = [Inequality(low_column_name=f'{i}', high_column_name=f'{i + 1}') for i in range(9)]
 
     # Run
-    synthesizer = run_copula(data, metadata, patterns)
+    synthesizer = run_copula(data, metadata, constraints)
     samples = synthesizer.sample(100)
 
     updated_metadata = synthesizer.get_metadata('modified')
@@ -992,10 +992,10 @@ def test_validate_cag_multi(data_multi, metadata_multi, pattern_multi):
     assert all(synthetic_data['table1']['A'] < synthetic_data['table1']['B'])
 
 
-def test_validate_cag_multi_with_reject(data_reject, metadata_reject, patterns_reject):
+def test_validate_cag_multi_with_reject(data_reject, metadata_reject, constraints_reject):
     """Test validate_cag works with reject sampling."""
     # Setup
-    synthesizer = run_copula(data_reject, metadata_reject, patterns_reject)
+    synthesizer = run_copula(data_reject, metadata_reject, constraints_reject)
     synthetic_data = synthesizer.sample(100)
 
     # Run
@@ -1005,10 +1005,10 @@ def test_validate_cag_multi_with_reject(data_reject, metadata_reject, patterns_r
     assert all(synthetic_data['low'] <= synthetic_data['high'])
 
 
-def test_validate_cag_multi_with_reject_raises(data_reject, metadata_reject, patterns_reject):
+def test_validate_cag_multi_with_reject_raises(data_reject, metadata_reject, constraints_reject):
     """Test validate_cag raises an error due reject sampling constraint not matching."""
     # Setup
-    synthesizer = run_copula(data_reject, metadata_reject, patterns_reject)
+    synthesizer = run_copula(data_reject, metadata_reject, constraints_reject)
 
     # constraint 1 matches, but constraint 2 does not
     synthetic_data = pd.DataFrame({
