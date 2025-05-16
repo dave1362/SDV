@@ -543,11 +543,11 @@ def test_validate_constraints_multi_raises(data_multi, metadata_multi, constrain
     """Test validate_constraints raises an error with bad multitable synthetic data with Range."""
     # Setup
     synthetic_data = {
-        'table1': {
+        'table1': pd.DataFrame({
             'A': data_multi['table1']['B'],
             'B': data_multi['table1']['A'],
             'C': data_multi['table1']['C'],
-        },
+        }),
         'table2': pd.DataFrame({'id': range(5)}),
     }
     synthesizer = run_hma(data_multi, metadata_multi, constraint_multi)
