@@ -149,7 +149,7 @@ def run_constraint(constraint, data, metadata):
 
 def run_copula(data, metadata, constraint):
     synthesizer = GaussianCopulaSynthesizer(metadata)
-    synthesizer.add_cag(constraints=constraint)
+    synthesizer.add_constraint(constraints=constraint)
     synthesizer.fit(data)
 
     return synthesizer
@@ -157,7 +157,7 @@ def run_copula(data, metadata, constraint):
 
 def run_hma(data, metadata, constraint):
     synthesizer = HMASynthesizer(metadata)
-    synthesizer.add_cag(constraints=[constraint])
+    synthesizer.add_constraint(constraints=[constraint])
     synthesizer.fit(data)
 
     return synthesizer
